@@ -3,31 +3,31 @@
 <head>
 
   <script>
-  window.pixelId = "680b1e5c9df83840f7c11e63";
-  var a = document.createElement("script");
-  a.setAttribute("async", "");
-  a.setAttribute("defer", "");
-  a.setAttribute("src", "https://cdn.utmify.com.br/scripts/pixel/pixel.js");
-  document.head.appendChild(a);
-</script>
-
-  <!-- Meta Pixel Code -->
-  <script>
-    !function(f,b,e,v,n,t,s)
-    {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-    n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-    if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-    n.queue=[];t=b.createElement(e);t.async=!0;
-    t.src=v;s=b.getElementsByTagName(e)[0];
-    s.parentNode.insertBefore(t,s)}(window, document,'script',
-    'https://connect.facebook.net/en_US/fbevents.js');
-    fbq('init', '1346739396551784');
-    fbq('track', 'PageView');
-    </script>
-    <noscript><img height="1" width="1" style="display:none"
-    src="https://www.facebook.com/tr?id=1346739396551784&ev=PageView&noscript=1"
-    /></noscript>
-    <!-- End Meta Pixel Code -->
+    window.pixelId = "680b1e5c9df83840f7c11e63";
+    var a = document.createElement("script");
+    a.setAttribute("async", "");
+    a.setAttribute("defer", "");
+    a.setAttribute("src", "https://cdn.utmify.com.br/scripts/pixel/pixel.js");
+    document.head.appendChild(a);
+  </script>
+  
+    <!-- Meta Pixel Code -->
+    <script>
+      !function(f,b,e,v,n,t,s)
+      {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+      n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+      if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+      n.queue=[];t=b.createElement(e);t.async=!0;
+      t.src=v;s=b.getElementsByTagName(e)[0];
+      s.parentNode.insertBefore(t,s)}(window, document,'script',
+      'https://connect.facebook.net/en_US/fbevents.js');
+      fbq('init', '1346739396551784');
+      fbq('track', 'PageView');
+      </script>
+      <noscript><img height="1" width="1" style="display:none"
+      src="https://www.facebook.com/tr?id=1346739396551784&ev=PageView&noscript=1"
+      /></noscript>
+      <!-- End Meta Pixel Code -->
 
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -463,6 +463,9 @@
     let esperandoRespostaTiragem = false; // Variável para controlar o delay após a tiragem
     let sequenciaInicialCompleta = false; // Variável para controlar se a sequência inicial foi concluída
     let primeiraRespostaAposSequencia = true; // Variável para controlar a primeira resposta após a sequência inicial
+    let mensagensFinaisEnviadas = false; // Variável para controlar se as mensagens finais foram enviadas
+    let funilCompleto = false; // Variável para controlar se o funil foi completado
+    let respostaTiragemRecebida = false; // Variável para controlar se a resposta da tiragem foi recebida
 
     function appendMessage(content, sender = 'bot', isHTML = false) {
       removeTyping();
@@ -500,6 +503,12 @@
       appendMessage(userInput, 'user');
       document.getElementById('userInput').value = '';
       
+      // Se o funil já foi completado, apenas reenviar o link de pagamento
+      if (funilCompleto) {
+        setTimeout(() => reenviarLinkPagamento(), 1000);
+        return;
+      }
+      
       // Se a sequência inicial ainda não foi concluída, ignorar completamente a resposta
       if (!sequenciaInicialCompleta) {
         return; // Ignorar completamente a resposta durante a sequência inicial
@@ -511,11 +520,12 @@
         autoResponseTimer = null;
       }
       
-      // Se estamos esperando resposta após a tiragem, iniciar o timer de 20 segundos
+      // Se estamos esperando resposta após a tiragem, marcar que recebemos a resposta e iniciar o timer de 15 segundos
       if (esperandoRespostaTiragem) {
+        respostaTiragemRecebida = true;
         setTimeout(() => {
           continuarAposTiragem();
-        }, 20000); // 20 segundos de delay após a resposta do usuário
+        }, 15000); // 15 segundos de delay após a resposta do usuário
         esperandoRespostaTiragem = false;
         return;
       }
@@ -527,6 +537,14 @@
       } else {
         setTimeout(() => handleChatFlow(userInput.toLowerCase()), 1000);
       }
+    }
+
+    // Função para reenviar o link de pagamento após o funil estar completo
+    function reenviarLinkPagamento() {
+      showTyping();
+      setTimeout(() => {
+        appendMessage("Aqui está o link pra você confirmar seu Ritual de Desbloqueio:<br>👉 <a href='https://pagamento.divinotarot.site/checkout?product=e880f79b-2180-11f0-b1cb-46da4690ad53' target='_blank'>CLIQUE AQUI PARA PAGAR</a>", 'bot', true);
+      }, 1500);
     }
 
     // Função para iniciar o fluxo após a sequência inicial
@@ -573,14 +591,9 @@
                     appendMessage("<img src='images/imagemoficial.png' alt='Imagem da tiragem' style='max-width: 100%; height: auto;'><br>Agora que fizemos a tiragem, vou te contar o que cada uma destas cartas significam em sua vida, okay?", 'bot', true);
                     step = 12;
                     esperandoRespostaTiragem = true; // Ativar o modo de espera após a tiragem
+                    respostaTiragemRecebida = false; // Resetar a variável de controle
                     
-                    // Configurar timer de 20 segundos caso o usuário não responda
-                    autoResponseTimer = setTimeout(() => {
-                      if (esperandoRespostaTiragem) {
-                        continuarAposTiragem();
-                        esperandoRespostaTiragem = false;
-                      }
-                    }, 20000);
+                    // Não configuramos timer automático aqui, pois o usuário precisa responder para continuar
                   }, 1500);
                 }, 1500);
               }, 1500);
@@ -619,11 +632,8 @@
           continuarFunil();
         }
       } else {
-        if (finalStepReached) {
-          showTyping();
-          setTimeout(() => {
-            appendMessage("Aqui está o link pra você confirmar seu Ritual de Desbloqueio:<br>👉 <a href='https://pagamento.divinotarot.site/checkout?product=e880f79b-2180-11f0-b1cb-46da4690ad53' target='_blank'>CLIQUE AQUI PARA PAGAR</a>", 'bot', true);
-          }, 1500);
+        if (finalStepReached && !mensagensFinaisEnviadas) {
+          enviarMensagensFinais();
         }
       }
     }
@@ -637,12 +647,36 @@
         setTimeout(() => {
           appendMessage("Aqui está o link pra você confirmar seu Ritual de Desbloqueio:<br>👉 <a href='https://pagamento.divinotarot.site/checkout?product=e880f79b-2180-11f0-b1cb-46da4690ad53' target='_blank'>CLIQUE AQUI PARA PAGAR</a>", 'bot', true);
           finalStepReached = true;
+          
+          // Enviar as mensagens finais após 2 segundos
+          setTimeout(() => {
+            enviarMensagensFinais();
+          }, 2000);
         }, 1500);
       }, 1500);
     }
 
-    // Função para continuar após a tiragem com delay de 20 segundos
+    // Função para enviar as mensagens finais
+    function enviarMensagensFinais() {
+      if (mensagensFinaisEnviadas) return; // Evitar envio duplicado
+      
+      showTyping();
+      setTimeout(() => {
+        appendMessage("Não perca essa oportunidade, estamos com poucos atendimentos sobrando...", 'bot');
+        showTyping();
+        setTimeout(() => {
+          appendMessage("Aproveite os horários disponível ainda hoje! 🚨", 'bot');
+          mensagensFinaisEnviadas = true;
+          funilCompleto = true; // Marcar que o funil foi completado
+        }, 1500);
+      }, 1500);
+    }
+
+    // Função para continuar após a tiragem com delay de 15 segundos
     function continuarAposTiragem() {
+      // Só continua se o usuário tiver respondido
+      if (!respostaTiragemRecebida) return;
+      
       showTyping();
       setTimeout(() => {
         appendMessage("🔮 01. O Diabo (invertido)<br>Relação marcada por dependência, possessividade ou obsessão. Invertida, mostra chance de libertação desses padrões e reconquista mais saudável.", 'bot', true);
