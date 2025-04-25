@@ -723,13 +723,20 @@
         showTyping();
         setTimeout(() => {
           appendMessage(`🌟 Esse ritual é feito com proteção espiritual e direcionamento personalizado para o seu caso. Ele tem o valor simbólico de <strong>R$ 59,90</strong>, e pode ser feito hoje mesmo.`, 'bot', true);
+          
+          // Adicionar o depoimento da Jessica após a mensagem sobre o valor do ritual
           showTyping();
           setTimeout(() => {
-            const saudacao = nomeUsuario ? `${nomeUsuario}, ` : "";
-            appendMessage(`<strong>${saudacao}me diz: SIM</strong> para seguir com o pagamento e iniciar o ritual!<br><br>Oferecemos garantia de satisfação: se não perceber resultados em 30 dias, devolvemos seu investimento.`, 'bot', true);
-            step = 18;
-            perguntaEnviada = false; // Resetar a variável de controle
-          }, 1500);
+            appendMessage(`<img src='images/feedback.png' alt='Depoimento da Jessica' style='max-width: 100%; height: auto;'><br>Jessica recuperou seu amor em apenas 14 dias com o <strong>Ritual de Desbloqueio</strong>. Você pode ser a próxima! ❤️`, 'bot', true);
+            
+            showTyping();
+            setTimeout(() => {
+              const saudacao = nomeUsuario ? `${nomeUsuario}, ` : "";
+              appendMessage(`<strong>${saudacao}me diz: SIM</strong> para seguir com o pagamento e iniciar o ritual!<br><br>Oferecemos garantia de satisfação: se não perceber resultados em 30 dias, devolvemos seu investimento.`, 'bot', true);
+              step = 18;
+              perguntaEnviada = false; // Resetar a variável de controle
+            }, 2000);
+          }, 2000);
         }, 1500);
       } else if (step === 18 && !finalStepReached) {
         // Se a pergunta ainda não foi enviada, enviar a pergunta
@@ -787,7 +794,7 @@
         appendMessage(`${saudacao}não perca essa oportunidade! Mais de 1.500 pessoas já realizaram esse ritual com resultados incríveis em seus relacionamentos.`, 'bot');
         showTyping();
         setTimeout(() => {
-          appendMessage(`Aproveite os horários disponíveis ainda hoje! Restam apenas 3 vagas para hoje! 🚨<br><br>Clique no link acima AGORA para garantir seu lugar antes que outra pessoa reserve.`, 'bot', true);
+          appendMessage(`Aproveite os horários disponíveis ainda hoje! Restam apenas 3 vagas para hoje! 🚨<br><br>Clique no link acima <strong>AGORA</strong> para garantir seu lugar antes que outra pessoa reserve.`, 'bot', true);
           mensagensFinaisEnviadas = true;
           funilCompleto = true; // Marcar que o funil foi completado
         }, 1500);
