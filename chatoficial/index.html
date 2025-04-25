@@ -184,6 +184,12 @@
       margin: 5px 0;
     }
 
+    /* Destaque para ofertas limitadas */
+    .limited-offer {
+      color: #d32f2f;
+      font-weight: bold;
+    }
+
     /* Media Queries para Responsividade */
 
     /* Telas muito pequenas (smartphones pequenos) */
@@ -466,6 +472,7 @@
     let mensagensFinaisEnviadas = false; // Variável para controlar se as mensagens finais foram enviadas
     let funilCompleto = false; // Variável para controlar se o funil foi completado
     let respostaTiragemRecebida = false; // Variável para controlar se a resposta da tiragem foi recebida
+    let nomeUsuario = ""; // Variável para armazenar o nome do usuário para personalização
 
     function appendMessage(content, sender = 'bot', isHTML = false) {
       removeTyping();
@@ -496,6 +503,110 @@
       }
     }
 
+    // Lista de nomes comuns brasileiros para verificação
+    const nomesComuns = [
+      "maria", "ana", "joão", "jose", "josé", "antonio", "antônio", "carlos", "paulo", "pedro", "lucas", 
+      "luiz", "luis", "marcos", "gabriel", "rafael", "daniel", "marcelo", "bruno", "eduardo", "felipe", 
+      "rodrigo", "manoel", "manuel", "andré", "andre", "adriano", "leonardo", "gustavo", "vitor", "victor", 
+      "alexandre", "ricardo", "mariana", "juliana", "fernanda", "patricia", "patrícia", "camila", "julia", 
+      "júlia", "amanda", "bruna", "leticia", "letícia", "aline", "tatiana", "natalia", "natália", "carolina", 
+      "beatriz", "larissa", "jessica", "jéssica", "gabriela", "vanessa", "luciana", "silvia", "sílvia", 
+      "renata", "isabela", "isabel", "vitoria", "vitória", "clara", "bianca", "carla", "sandra", "alice", 
+      "luana", "raquel", "roberta", "michele", "monique", "simone", "sabrina", "eliane", "eliana", "rita", 
+      "rosa", "vera", "teresa", "tereza", "cristina", "claudia", "cláudia", "angela", "ângela", "marta", 
+      "lucia", "lúcia", "adriana", "fabiana", "denise", "sueli", "suely", "valeria", "valéria", "rosana", 
+      "rosângela", "rosangela", "aparecida", "conceição", "conceiçao", "fatima", "fátima", "benedita", 
+      "antonia", "antônia", "francisca", "sebastiana", "sebastião", "sebastiao", "jorge", "mateus", "matheus", 
+      "thiago", "tiago", "henrique", "diego", "igor", "caio", "vinicius", "vinícius", "samuel", "renan", 
+      "arthur", "artur", "alex", "alan", "fabio", "fábio", "douglas", "leandro", "guilherme", "william", 
+      "willian", "everton", "everton", "roberto", "rogerio", "rogério", "sergio", "sérgio", "anderson", 
+      "andersen", "mauricio", "maurício", "augusto", "renato", "cesar", "césar", "edson", "erick", "eric", 
+      "mario", "mário", "flavio", "flávio", "geraldo", "ronaldo", "nilton", "milton", "nelson", "wilson", 
+      "wilton", "adilson", "ailton", "alisson", "allison", "dalton", "elton", "wellington", "welington", 
+      "washington", "jefferson", "jeferson", "denilson", "edilson", "edmilson", "emerson", "émerson", 
+      "anderson", "andeson", "wanderson", "wandeson", "weslley", "wesley", "wendel", "wendell", "michel", 
+      "miguel", "raphael", "davi", "david", "kevin", "kelvin", "bryan", "ryan", "luan", "kauan", "kauã", 
+      "kaua", "cauã", "caua", "cauê", "caue", "enzo", "valentina", "sophia", "sofia", "helena", "valentina", 
+      "cecilia", "cecília", "lara", "giovanna", "giovana", "maria", "heloisa", "heloísa", "helena", "luiza", 
+      "louise", "livia", "lívia", "lorena", "yasmin", "jasmin", "lavinia", "lavínia", "nicole", "emilly", 
+      "emily", "sarah", "sara", "isis", "marina", "alicia", "alícia", "luna", "rebeca", "agatha", "ágatha", 
+      "gabrielly", "milena", "catarina", "melissa", "emanuelly", "emanuelle", "emanuela", "ester", "esther", 
+      "eduarda", "mariah", "stella", "stefany", "stefani", "stefanie", "estefani", "estefânia", "estefania", 
+      "anita", "aurora", "pietra", "mikaela", "micaela", "rafaela", "rayssa", "raissa", "raíssa", "raysa", 
+      "raisa", "raísa", "mirella", "melina", "melinda", "melanie", "melany", "melaine", "melaine", "melaine"
+    ];
+
+    // Palavras que não devem ser consideradas como nomes
+    const palavrasNaoNomes = [
+      "sim", "não", "nao", "ok", "okay", "certo", "claro", "entendi", "entendido", "combinado", 
+      "beleza", "blz", "oi", "olá", "ola", "bom", "dia", "tarde", "noite", "obrigado", "obrigada", 
+      "obg", "vlw", "valeu", "legal", "top", "massa", "show", "joia", "jóia", "bacana", "tranquilo", 
+      "tranquila", "pois", "então", "entao", "agora", "depois", "antes", "hoje", "amanhã", "amanha", 
+      "ontem", "semana", "mês", "mes", "ano", "próximo", "proximo", "passado", "seguinte", "anterior", 
+      "quero", "desejo", "preciso", "necessito", "gostaria", "adoraria", "pretendo", "vou", "irei", 
+      "farei", "posso", "consigo", "conseguirei", "talvez", "quem", "sabe", "como", "quando", "onde", 
+      "porque", "porquê", "por", "que", "qual", "quais", "quanto", "quantos", "quantas", "quanta", 
+      "muito", "muita", "muitos", "muitas", "pouco", "pouca", "poucos", "poucas", "bastante", "demais", 
+      "tudo", "todo", "toda", "todos", "todas", "nada", "nenhum", "nenhuma", "nenhuns", "nenhumas", 
+      "algum", "alguma", "alguns", "algumas", "outro", "outra", "outros", "outras", "mesmo", "mesma", 
+      "mesmos", "mesmas", "próprio", "própria", "próprios", "próprias", "proprio", "propria", "proprios", 
+      "proprias", "cada", "qualquer", "quaisquer", "tanto", "tanta", "tantos", "tantas", "mais", "menos", 
+      "maior", "menor", "maiores", "menores", "melhor", "pior", "melhores", "piores", "bom", "boa", 
+      "bons", "boas", "mau", "má", "maus", "más", "grande", "pequeno", "pequena", "grandes", "pequenos", 
+      "pequenas", "alto", "alta", "altos", "altas", "baixo", "baixa", "baixos", "baixas", "novo", "nova", 
+      "novos", "novas", "velho", "velha", "velhos", "velhas", "antigo", "antiga", "antigos", "antigas", 
+      "caro", "cara", "caros", "caras", "barato", "barata", "baratos", "baratas", "fácil", "facil", 
+      "difícil", "dificil", "fáceis", "faceis", "difíceis", "dificeis", "simples", "complexo", "complexa", 
+      "complexos", "complexas", "rápido", "rapido", "rápida", "rapida", "rápidos", "rapidos", "rápidas", 
+      "rapidas", "lento", "lenta", "lentos", "lentas", "devagar", "longe", "perto", "dentro", "fora", 
+      "acima", "abaixo", "sobre", "sob", "entre", "através", "atraves", "durante", "após", "apos", 
+      "antes", "depois", "desde", "até", "ate", "com", "sem", "para", "por", "em", "de", "do", "da", 
+      "dos", "das", "no", "na", "nos", "nas", "ao", "aos", "à", "às", "a", "as", "o", "os", "um", "uns", 
+      "uma", "umas", "este", "esta", "estes", "estas", "esse", "essa", "esses", "essas", "aquele", 
+      "aquela", "aqueles", "aquelas", "isto", "isso", "aquilo", "meu", "minha", "meus", "minhas", "teu", 
+      "tua", "teus", "tuas", "seu", "sua", "seus", "suas", "nosso", "nossa", "nossos", "nossas", "vosso", 
+      "vossa", "vossos", "vossas", "dele", "dela", "deles", "delas", "nele", "nela", "neles", "nelas", 
+      "me", "te", "se", "nos", "vos", "lhe", "lhes", "o", "a", "os", "as", "lo", "la", "los", "las", 
+      "eu", "tu", "ele", "ela", "nós", "nos", "vós", "vos", "eles", "elas", "você", "voce", "vocês", 
+      "voces", "senhor", "senhora", "senhores", "senhoras", "sr", "sra", "sr.", "sra.", "doutor", 
+      "doutora", "dr", "dra", "dr.", "dra.", "professor", "professora", "prof", "profa", "prof.", "profa."
+    ];
+
+    // Função melhorada para extrair nome do texto
+    function extrairNome(texto) {
+      // Remover caracteres especiais e converter para minúsculas
+      const textoLimpo = texto.toLowerCase()
+        .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // Remove acentos
+        .replace(/[^\w\s]/g, ' ') // Substitui caracteres especiais por espaço
+        .replace(/\s+/g, ' ').trim(); // Remove espaços extras
+      
+      // Dividir o texto em palavras
+      const palavras = textoLimpo.split(' ');
+      
+      // Verificar se o formato é "nome, idade" ou "nome - idade"
+      const formatoIdade = texto.match(/([A-Za-zÀ-ÖØ-öø-ÿ\s]+)[,\-]\s*(\d+)/i);
+      if (formatoIdade && formatoIdade[1]) {
+        return formatoIdade[1].trim().split(' ')[0]; // Retorna o primeiro nome
+      }
+      
+      // Verificar se há algum nome comum na resposta
+      for (const palavra of palavras) {
+        // Verificar se a palavra tem pelo menos 3 caracteres e está na lista de nomes comuns
+        if (palavra.length >= 3 && nomesComuns.includes(palavra) && !palavrasNaoNomes.includes(palavra)) {
+          return palavra.charAt(0).toUpperCase() + palavra.slice(1); // Capitaliza o nome
+        }
+      }
+      
+      // Se não encontrou um nome conhecido, verifica se a primeira palavra tem pelo menos 3 letras
+      // e não está na lista de palavras que não são nomes
+      if (palavras[0] && palavras[0].length >= 3 && !palavrasNaoNomes.includes(palavras[0])) {
+        return palavras[0].charAt(0).toUpperCase() + palavras[0].slice(1); // Capitaliza a primeira palavra
+      }
+      
+      // Se nenhuma das verificações acima encontrou um nome, retorna string vazia
+      return "";
+    }
+
     function enviarMensagem() {
       const userInput = document.getElementById('userInput').value;
       if (!userInput.trim()) return;
@@ -518,6 +629,11 @@
       if (autoResponseTimer) {
         clearTimeout(autoResponseTimer);
         autoResponseTimer = null;
+      }
+      
+      // Se for a primeira resposta após a sequência inicial, extrair o nome do usuário
+      if (primeiraRespostaAposSequencia) {
+        nomeUsuario = extrairNome(userInput);
       }
       
       // Se estamos esperando resposta após a tiragem, marcar que recebemos a resposta e iniciar o timer de 15 segundos
@@ -543,15 +659,17 @@
     function reenviarLinkPagamento() {
       showTyping();
       setTimeout(() => {
-        appendMessage("Aqui está o link pra você confirmar seu Ritual de Desbloqueio:<br>👉 <a href='https://pagamento.divinotarot.site/checkout?product=e880f79b-2180-11f0-b1cb-46da4690ad53' target='_blank'>CLIQUE AQUI PARA PAGAR</a>", 'bot', true);
+        appendMessage(`Aqui está o link para você garantir seu Ritual de Desbloqueio AGORA:<br>👉 <a href='https://pagamento.divinotarot.site/checkout?product=e880f79b-2180-11f0-b1cb-46da4690ad53' target='_blank'>CLIQUE AQUI PARA GARANTIR SUA VAGA</a><br><br><span class="limited-offer">⏰ OFERTA VÁLIDA APENAS HOJE: Últimas 3 vagas com desconto!</span>`, 'bot', true);
       }, 1500);
     }
 
     // Função para iniciar o fluxo após a sequência inicial
     function iniciarFluxoAposSequenciaInicial(input) {
+      const saudacao = nomeUsuario ? `${nomeUsuario}, ` : "";
+      
       showTyping();
       setTimeout(() => {
-        appendMessage("Senti uma energia intensa no momento em que você respondeu… é como se algo precisasse ser revelado urgente 🌀", 'bot');
+        appendMessage(`${saudacao}senti uma energia intensa no momento em que você respondeu… é como se algo precisasse ser revelado urgente 🌀`, 'bot');
         showTyping();
         setTimeout(() => {
           const msg6 = `<strong>Me diz com o coração aberto:</strong><br><br>Qual dessas situações mais descreve o que você sente hoje?<br><br>1️⃣ Quero meu amor de volta<br>2️⃣ Quero saber da minha vida amorosa<br>3️⃣ Quero saber se o amor é correspondido`;
@@ -588,7 +706,8 @@
                   appendMessage("💫 Na tiragem das cartas, vejo algo muito claro sobre você: Mesmo com a distância, você ainda carrega um laço forte com essa pessoa — e um desejo sincero de reviver esse amor.", 'bot');
                   showTyping();
                   setTimeout(() => {
-                    appendMessage("<img src='images/imagemoficial.png' alt='Imagem da tiragem' style='max-width: 100%; height: auto;'><br>Agora que fizemos a tiragem, vou te contar o que cada uma destas cartas significam em sua vida, okay?", 'bot', true);
+                    const saudacao = nomeUsuario ? `${nomeUsuario}, ` : "";
+                    appendMessage(`<img src='images/imagemoficial.png' alt='Imagem da tiragem' style='max-width: 100%; height: auto;'><br>${saudacao}agora que fizemos a tiragem, vou te contar o que cada uma destas cartas significam em sua vida, okay?`, 'bot', true);
                     step = 12;
                     esperandoRespostaTiragem = true; // Ativar o modo de espera após a tiragem
                     respostaTiragemRecebida = false; // Resetar a variável de controle
@@ -603,10 +722,11 @@
       } else if (step === 17) {
         showTyping();
         setTimeout(() => {
-          appendMessage("🌟 Esse ritual é feito com proteção espiritual e direcionamento personalizado para o seu caso. Ele tem o valor simbólico de <strong>R$ 59,90</strong>, e pode ser feito hoje mesmo.", 'bot', true);
+          appendMessage(`🌟 Esse ritual é feito com proteção espiritual e direcionamento personalizado para o seu caso. Ele tem o valor simbólico de <strong>R$ 59,90</strong>, e pode ser feito hoje mesmo.`, 'bot', true);
           showTyping();
           setTimeout(() => {
-            appendMessage("<strong>Me diz: SIM</strong> para seguir com o pagamento e iniciar o ritual!", 'bot', true);
+            const saudacao = nomeUsuario ? `${nomeUsuario}, ` : "";
+            appendMessage(`<strong>${saudacao}me diz: SIM</strong> para seguir com o pagamento e iniciar o ritual!<br><br>Oferecemos garantia de satisfação: se não perceber resultados em 30 dias, devolvemos seu investimento.`, 'bot', true);
             step = 18;
             perguntaEnviada = false; // Resetar a variável de controle
           }, 1500);
@@ -645,7 +765,7 @@
         appendMessage("Perfeito, meu amor!", 'bot');
         showTyping();
         setTimeout(() => {
-          appendMessage("Aqui está o link pra você confirmar seu Ritual de Desbloqueio:<br>👉 <a href='https://pagamento.divinotarot.site/checkout?product=e880f79b-2180-11f0-b1cb-46da4690ad53' target='_blank'>CLIQUE AQUI PARA PAGAR</a>", 'bot', true);
+          appendMessage(`Aqui está o link para você garantir seu Ritual de Desbloqueio AGORA:<br>👉 <a href='https://pagamento.divinotarot.site/checkout?product=e880f79b-2180-11f0-b1cb-46da4690ad53' target='_blank'>CLIQUE AQUI PARA GARANTIR SUA VAGA</a><br><br><span class="limited-offer">⏰ OFERTA VÁLIDA APENAS HOJE: Últimas 3 vagas com desconto!</span>`, 'bot', true);
           finalStepReached = true;
           
           // Enviar as mensagens finais após 2 segundos
@@ -660,12 +780,14 @@
     function enviarMensagensFinais() {
       if (mensagensFinaisEnviadas) return; // Evitar envio duplicado
       
+      const saudacao = nomeUsuario ? `${nomeUsuario}, ` : "";
+      
       showTyping();
       setTimeout(() => {
-        appendMessage("Não perca essa oportunidade, estamos com poucos atendimentos sobrando...", 'bot');
+        appendMessage(`${saudacao}não perca essa oportunidade! Mais de 1.500 pessoas já realizaram esse ritual com resultados incríveis em seus relacionamentos.`, 'bot');
         showTyping();
         setTimeout(() => {
-          appendMessage("Aproveite os horários disponível ainda hoje! 🚨", 'bot');
+          appendMessage(`Aproveite os horários disponíveis ainda hoje! Restam apenas 3 vagas para hoje! 🚨<br><br>Clique no link acima AGORA para garantir seu lugar antes que outra pessoa reserve.`, 'bot', true);
           mensagensFinaisEnviadas = true;
           funilCompleto = true; // Marcar que o funil foi completado
         }, 1500);
@@ -679,28 +801,34 @@
       
       showTyping();
       setTimeout(() => {
-        appendMessage("🔮 01. O Diabo (invertido)<br>Relação marcada por dependência, possessividade ou obsessão. Invertida, mostra chance de libertação desses padrões e reconquista mais saudável.", 'bot', true);
+        appendMessage(`🔮 01. O Diabo (invertido)<br>Relação marcada por dependência, possessividade ou obsessão. Invertida, mostra chance de libertação desses padrões e reconquista mais saudável.`, 'bot', true);
         showTyping();
         setTimeout(() => {
-          appendMessage("🔮 02. Dez de Espadas<br>Fim doloroso, término difícil. Mas também sinal de que o pior já passou e um novo ciclo pode começar.", 'bot', true);
+          appendMessage(`🔮 02. Dez de Espadas<br>Fim doloroso, término difícil. Mas também sinal de que o pior já passou e um novo ciclo pode começar.`, 'bot', true);
           showTyping();
           setTimeout(() => {
-            appendMessage("🔮 03. A Temperança<br>Reconciliação, equilíbrio, cura emocional. Indica possibilidade de volta com mais harmonia e sabedoria.", 'bot', true);
+            appendMessage(`🔮 03. A Temperança<br>Reconciliação, equilíbrio, cura emocional. Indica possibilidade de volta com mais harmonia e sabedoria.`, 'bot', true);
             showTyping();
             setTimeout(() => {
-              appendMessage("<span style='font-weight: bold; font-size: 15px;'> RESUMO FINAL DA SUA CONSULTA:</span>", 'bot', true);
+              const nomeResumo = nomeUsuario ? ` ${nomeUsuario.toUpperCase()}` : "";
+              appendMessage(`<span style='font-weight: bold; font-size: 15px;'>RESUMO FINAL DA SUA CONSULTA${nomeResumo}:</span>`, 'bot', true);
               showTyping();
               setTimeout(() => {
                 appendMessage("<audio controls><source src='audio02.mp3' type='audio/mp3'>Seu navegador não suporta o elemento de áudio.</audio>", 'bot', true);
-                showTyping();
+                
+                // Adicionar delay de 10 segundos após o áudio antes de mostrar a próxima mensagem
                 setTimeout(() => {
-                  appendMessage("Mas isso tem solução — e eu posso te ajudar com um <strong>Ritual de Desbloqueio e Alinhamento Amoroso</strong> que vai limpar esse caminho e reabrir as portas pro retorno acontecer.", 'bot', true);
                   showTyping();
                   setTimeout(() => {
-                    appendMessage("<span style='font-weight: bold; color: #d32f2f; font-size: 15px;'> VOCÊ DESEJA FAZER? MUITO IMPORTANTE 🙌</span>", 'bot', true);
-                    step = 17;
+                    appendMessage(`Mas isso tem solução — e eu posso te ajudar com um <strong>Ritual de Desbloqueio e Alinhamento Amoroso</strong> que vai limpar esse caminho e reabrir as portas pro retorno acontecer.`, 'bot', true);
+                    showTyping();
+                    setTimeout(() => {
+                      appendMessage(`<span style='font-weight: bold; color: #d32f2f; font-size: 15px;'> VOCÊ DESEJA FAZER? MUITO IMPORTANTE 🙌</span><br><br>95% das pessoas que realizaram esse ritual relataram melhoras significativas em seus relacionamentos!`, 'bot', true);
+                      step = 17;
+                    }, 1500);
                   }, 1500);
-                }, 2000);
+                }, 10000); // 10 segundos de delay após o áudio
+                
               }, 1500);
             }, 1500);
           }, 1500);
