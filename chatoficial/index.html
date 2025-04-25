@@ -3,23 +3,23 @@
 <head>
 
   <!-- Meta Pixel Code -->
-<script>
-  !function(f,b,e,v,n,t,s)
-  {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-  n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-  if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-  n.queue=[];t=b.createElement(e);t.async=!0;
-  t.src=v;s=b.getElementsByTagName(e)[0];
-  s.parentNode.insertBefore(t,s)}(window, document,'script',
-  'https://connect.facebook.net/en_US/fbevents.js');
-  fbq('init', '1346739396551784');
-  fbq('track', 'PageView');
-  </script>
-  <noscript><img height="1" width="1" style="display:none"
-  src="https://www.facebook.com/tr?id=1346739396551784&ev=PageView&noscript=1"
-  /></noscript>
-  <!-- End Meta Pixel Code -->
-  
+  <script>
+    !function(f,b,e,v,n,t,s)
+    {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+    n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+    if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+    n.queue=[];t=b.createElement(e);t.async=!0;
+    t.src=v;s=b.getElementsByTagName(e)[0];
+    s.parentNode.insertBefore(t,s)}(window, document,'script',
+    'https://connect.facebook.net/en_US/fbevents.js');
+    fbq('init', '1346739396551784');
+    fbq('track', 'PageView');
+    </script>
+    <noscript><img height="1" width="1" style="display:none"
+    src="https://www.facebook.com/tr?id=1346739396551784&ev=PageView&noscript=1"
+    /></noscript>
+    <!-- End Meta Pixel Code -->
+
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Divino Tarot - Simulação WhatsApp</title>
@@ -446,12 +446,14 @@
 
   <script>
     const chatBox = document.getElementById('chatBox');
-    let step = 4;
+    let step = 0; // Começamos no passo 0 para controlar a sequência inicial
     let typingIndicator;
     let finalStepReached = false;
     let autoResponseTimer = null; // Variável para controlar o timer de resposta automática
     let perguntaEnviada = false; // Variável para controlar se a pergunta já foi enviada
     let esperandoRespostaTiragem = false; // Variável para controlar o delay após a tiragem
+    let sequenciaInicialCompleta = false; // Variável para controlar se a sequência inicial foi concluída
+    let primeiraRespostaAposSequencia = true; // Variável para controlar a primeira resposta após a sequência inicial
 
     function appendMessage(content, sender = 'bot', isHTML = false) {
       removeTyping();
@@ -489,6 +491,11 @@
       appendMessage(userInput, 'user');
       document.getElementById('userInput').value = '';
       
+      // Se a sequência inicial ainda não foi concluída, ignorar completamente a resposta
+      if (!sequenciaInicialCompleta) {
+        return; // Ignorar completamente a resposta durante a sequência inicial
+      }
+      
       // Cancelar o timer de resposta automática se o usuário responder
       if (autoResponseTimer) {
         clearTimeout(autoResponseTimer);
@@ -504,22 +511,31 @@
         return;
       }
       
-      setTimeout(() => handleChatFlow(userInput.toLowerCase()), 1000);
+      // Se for a primeira resposta após a sequência inicial, tratar de forma especial
+      if (primeiraRespostaAposSequencia) {
+        primeiraRespostaAposSequencia = false;
+        setTimeout(() => iniciarFluxoAposSequenciaInicial(userInput.toLowerCase()), 1000);
+      } else {
+        setTimeout(() => handleChatFlow(userInput.toLowerCase()), 1000);
+      }
+    }
+
+    // Função para iniciar o fluxo após a sequência inicial
+    function iniciarFluxoAposSequenciaInicial(input) {
+      showTyping();
+      setTimeout(() => {
+        appendMessage("Senti uma energia intensa no momento em que você respondeu… é como se algo precisasse ser revelado urgente 🌀", 'bot');
+        showTyping();
+        setTimeout(() => {
+          const msg6 = `<strong>Me diz com o coração aberto:</strong><br><br>Qual dessas situações mais descreve o que você sente hoje?<br><br>1️⃣ Quero meu amor de volta<br>2️⃣ Quero saber da minha vida amorosa<br>3️⃣ Quero saber se o amor é correspondido`;
+          appendMessage(msg6, 'bot', true);
+          step = 6;
+        }, 2000);
+      }, 1500);
     }
 
     function handleChatFlow(input) {
-      if (step === 4) {
-        showTyping();
-        setTimeout(() => {
-          appendMessage("Senti uma energia intensa no momento em que você respondeu… é como se algo precisasse ser revelado urgente 🌀", 'bot');
-          showTyping();
-          setTimeout(() => {
-            const msg6 = `<strong>Me diz com o coração aberto:</strong><br><br>Qual dessas situações mais descreve o que você sente hoje?<br><br>1️⃣ Quero meu amor de volta<br>2️⃣ Quero saber da minha vida amorosa<br>3️⃣ Quero saber se o amor é correspondido`;
-            appendMessage(msg6, 'bot', true);
-            step = 6;
-          }, 2000);
-        }, 1500);
-      } else if (step === 6) {
+      if (step === 6) {
         const opcoesValidas = ['1', '2', '3', 'um', 'dois', 'três', 'tres'];
         const encontrouOpcao = opcoesValidas.some(opcao => input.includes(opcao));
         if (encontrouOpcao) {
@@ -649,7 +665,8 @@
       }, 1500);
     }
 
-    window.onload = () => {
+    // Função para mostrar as mensagens iniciais em sequência sem interrupção
+    function mostrarSequenciaInicial() {
       const mensagensIniciais = [
         "<strong>Oi, meu amor! ✨ Seja muito bem-vinda ao Divino Tarot.</strong>",
         "Sou Júlia e senti sua energia antes mesmo de você chegar... Por isso, preparei uma tiragem <strong>GRATUITA</strong> e exclusiva. Mas preciso começar agora, essa conexão é forte e recente! 🔮",
@@ -657,12 +674,31 @@
         "💌 Me diga: qual seu nome completo e sua idade?<br><br><strong>(Ex: Maria de Souza, 28 anos)</strong>"
       ];
 
-      mensagensIniciais.forEach((mensagem, index) => {
-        setTimeout(() => {
+      let index = 0;
+      
+      function mostrarProximaMensagem() {
+        if (index < mensagensIniciais.length) {
           showTyping();
-          setTimeout(() => appendMessage(mensagem, 'bot', true), 1000);
-        }, index * 2500);
-      });
+          setTimeout(() => {
+            appendMessage(mensagensIniciais[index], 'bot', true);
+            index++;
+            if (index < mensagensIniciais.length) {
+              setTimeout(mostrarProximaMensagem, 2500);
+            } else {
+              // Todas as mensagens iniciais foram mostradas
+              sequenciaInicialCompleta = true;
+              step = 4; // Avançar para o próximo passo após a sequência inicial
+            }
+          }, 1000);
+        }
+      }
+      
+      mostrarProximaMensagem();
+    }
+
+    window.onload = () => {
+      // Iniciar a sequência de mensagens iniciais não interruptível
+      mostrarSequenciaInicial();
     };
   </script>
 </body>
