@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Divino Tarot - Simulação WhatsApp</title>
+  <style>
+    /* Estilos base */
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #efeae2;
+      background-image: url('https://i.imgur.com/2qGT5WZ.png');
+      font-family: 'Open Sans', sans-serif;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden; /* Impede rolagem do body */
+    }
+
+    .header {
+      background-color: #008069;
+      color: #fff;
+      padding: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .avatar {
+      width: 36px;
+      height: 36px;
+      min-width: 36px; /* Evita que o avatar encolha em telas pequenas */
+    }
+
+    .avatar img {
+      border-radius: 50%;
+      width: 100%;
+      height: 100%;
+      object-fit: cover; /* Garante que a imagem cubra o espaço sem distorção */
+    }
+
+    .user-info {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .user-info span.name {
+      font-size: 17px;
+      font-weight: 600;
+    }
+
+    .user-info span.status {
+      font-size: 13px;
+    }
+
+    .header-right i {
+      margin-left: 15px;
+      cursor: pointer;
+      font-size: 18px;
+    }
+
+    .chat-box {
+      flex: 1;
+      padding: 10px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      background-color: #efeae2;
+      background-image: url('https://i.imgur.com/2qGT5WZ.png');
+      padding-bottom: 70px; /* Altura da input-area + padding */
+    }
+
+    .msg {
+      max-width: 75%;
+      padding: 10px 15px;
+      border-radius: 10px;
+      margin: 6px 0;
+      font-size: 14px;
+      word-wrap: break-word; /* Garante que palavras longas não quebrem o layout */
+    }
+
+    .msg.bot {
+      background-color: #ffffff;
+      color: #303235;
+      align-self: flex-start;
+    }
+
+    .msg.user {
+      background-color: #D9FDD2;
+      color: #000000;
+      align-self: flex-end;
+    }
+
+    .input-area {
+      padding: 10px;
+      background-color: #f0f0f0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 10;
+      border-top: 1px solid #ddd;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .input-area input {
+      flex: 1;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 20px;
+      font-size: 16px; /* Aumentado para 16px para evitar zoom em dispositivos móveis */
+      -webkit-appearance: none; /* Evita estilo padrão em iOS */
+      appearance: none;
+    }
+
+    .input-area button {
+      background-color: #008069;
+      border: none;
+      color: white;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      min-width: 40px; /* Evita que o botão encolha em telas pequenas */
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+
+    /* Estilos para elementos de áudio e imagem */
+    audio {
+      max-width: 100%;
+      margin: 5px 0;
+    }
+
+    .msg img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 5px;
+      margin: 5px 0;
+    }
+
+    /* Media Queries para Responsividade */
+
+    /* Telas muito pequenas (smartphones pequenos) */
+    @media (max-width: 320px) {
+      .header {
+        padding: 8px 5px;
+      }
+      
+      .header-right i {
+        margin-left: 10px;
+        font-size: 16px;
+      }
+      
+      .avatar {
+        width: 32px;
+        height: 32px;
+        min-width: 32px;
+      }
+      
+      .user-info span.name {
+        font-size: 15px;
+      }
+      
+      .user-info span.status {
+        font-size: 11px;
+      }
+      
+      .msg {
+        max-width: 85%; /* Aumenta um pouco a largura em telas pequenas */
+        padding: 8px 12px;
+        font-size: 13px;
+      }
+      
+      .input-area {
+        padding: 8px 5px;
+      }
+      
+      .input-area input {
+        padding: 8px;
+        font-size: 16px; /* Mantém 16px para evitar zoom */
+      }
+      
+      .input-area button {
+        width: 36px;
+        height: 36px;
+        min-width: 36px;
+        font-size: 16px;
+      }
+      
+      .chat-box {
+        padding-bottom: 60px; /* Ajuste para telas menores */
+      }
+    }
+
+    /* Smartphones (até 480px) */
+    @media (min-width: 321px) and (max-width: 480px) {
+      .header {
+        padding: 8px;
+      }
+      
+      .msg {
+        max-width: 80%;
+      }
+      
+      .input-area {
+        padding: 8px;
+      }
+      
+      .chat-box {
+        padding-bottom: 65px;
+      }
+    }
+
+    /* Tablets pequenos (até 768px) */
+    @media (min-width: 481px) and (max-width: 768px) {
+      .msg {
+        max-width: 70%;
+      }
+      
+      body {
+        max-width: 600px;
+        margin: 0 auto;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      }
+      
+      .input-area {
+        max-width: 600px;
+        margin: 0 auto;
+        left: 50%;
+        transform: translateX(-50%);
+      }
+    }
+
+    /* Tablets e desktops pequenos (até 992px) */
+    @media (min-width: 769px) and (max-width: 992px) {
+      body {
+        max-width: 700px;
+        margin: 0 auto;
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+      }
+      
+      .msg {
+        max-width: 65%;
+        font-size: 15px;
+      }
+      
+      .input-area input {
+        font-size: 16px; /* Mantém 16px para consistência */
+      }
+      
+      .input-area {
+        max-width: 700px;
+        margin: 0 auto;
+        left: 50%;
+        transform: translateX(-50%);
+      }
+    }
+
+    /* Desktops (acima de 992px) */
+    @media (min-width: 993px) {
+      body {
+        max-width: 800px;
+        margin: 0 auto;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+      }
+      
+      .header {
+        padding: 12px 15px;
+      }
+      
+      .avatar {
+        width: 40px;
+        height: 40px;
+        min-width: 40px;
+      }
+      
+      .user-info span.name {
+        font-size: 18px;
+      }
+      
+      .user-info span.status {
+        font-size: 14px;
+      }
+      
+      .msg {
+        max-width: 60%;
+        padding: 12px 18px;
+        font-size: 15px;
+        margin: 8px 0;
+      }
+      
+      .input-area {
+        padding: 12px 15px;
+        max-width: 800px;
+        margin: 0 auto;
+        left: 50%;
+        transform: translateX(-50%);
+      }
+      
+      .input-area input {
+        padding: 12px 15px;
+        font-size: 16px; /* Mantém 16px para consistência */
+      }
+      
+      .input-area button {
+        width: 44px;
+        height: 44px;
+        min-width: 44px;
+        font-size: 20px;
+      }
+      
+      .chat-box {
+        padding-bottom: 80px;
+      }
+    }
+
+    /* Ajustes para orientação paisagem em dispositivos móveis */
+    @media (max-height: 500px) and (orientation: landscape) {
+      .header {
+        padding: 5px 10px;
+      }
+      
+      .avatar {
+        width: 30px;
+        height: 30px;
+        min-width: 30px;
+      }
+      
+      .user-info span.name {
+        font-size: 14px;
+      }
+      
+      .user-info span.status {
+        font-size: 11px;
+      }
+      
+      .chat-box {
+        padding: 5px;
+        padding-bottom: 55px;
+      }
+      
+      .msg {
+        padding: 8px 12px;
+        margin: 4px 0;
+        font-size: 13px;
+      }
+      
+      .input-area {
+        padding: 5px 8px;
+      }
+      
+      .input-area button {
+        width: 34px;
+        height: 34px;
+        min-width: 34px;
+      }
+    }
+
+    /* Ajustes para telas de alta resolução */
+    @media (min-width: 1200px) {
+      body {
+        max-width: 900px;
+      }
+      
+      .input-area {
+        max-width: 900px;
+      }
+    }
+
+    /* Ajustes para dispositivos com tela sensível ao toque */
+    @media (hover: none) and (pointer: coarse) {
+      .input-area button {
+        padding: 0; /* Remove padding para evitar problemas em alguns dispositivos touch */
+      }
+      
+      .header-right i {
+        padding: 5px; /* Aumenta a área de toque */
+      }
+    }
+  </style>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/material-design-iconic-font/2.2.0/css/material-design-iconic-font.min.css">
+</head>
+<body>
+  <div class="header">
+    <div class="header-left">
+      <div class="avatar">
+        <img src="images/logo.png" alt="Avatar">
+      </div>
+      <div class="user-info">
+        <span class="name">Divino Tarot</span>
+        <span class="status" id="statusText">Online</span>
+      </div>
+    </div>
+    <div class="header-right">
+      <i class="zmdi zmdi-videocam"></i>
+      <i class="zmdi zmdi-phone"></i>
+      <i class="zmdi zmdi-more-vert"></i>
+    </div>
+  </div>
+
+  <div class="chat-box" id="chatBox"></div>
+
+  <div class="input-area">
+    <input type="text" id="userInput" placeholder="Digite aqui..." onkeydown="if(event.key === 'Enter'){enviarMensagem()}">
+    <button onclick="enviarMensagem()">
+      <i class="zmdi zmdi-mail-send"></i>
+    </button>
+  </div>
+
+  <script>
+    const chatBox = document.getElementById('chatBox');
+    let step = 4;
+    let typingIndicator;
+    let finalStepReached = false;
+
+    function appendMessage(content, sender = 'bot', isHTML = false) {
+      removeTyping();
+      const msgDiv = document.createElement('div');
+      msgDiv.classList.add('msg', sender);
+      if (isHTML) {
+        msgDiv.innerHTML = content;
+      } else {
+        msgDiv.textContent = content;
+      }
+      chatBox.appendChild(msgDiv);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    function showTyping() {
+      removeTyping();
+      typingIndicator = document.createElement('div');
+      typingIndicator.classList.add('msg', 'bot');
+      typingIndicator.textContent = 'digitando...';
+      typingIndicator.style.fontStyle = 'italic';
+      chatBox.appendChild(typingIndicator);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    function removeTyping() {
+      if (typingIndicator && typingIndicator.parentNode) {
+        chatBox.removeChild(typingIndicator);
+      }
+    }
+
+    function enviarMensagem() {
+      const userInput = document.getElementById('userInput').value;
+      if (!userInput.trim()) return;
+
+      appendMessage(userInput, 'user');
+      document.getElementById('userInput').value = '';
+      setTimeout(() => handleChatFlow(userInput.toLowerCase()), 1000);
+    }
+
+    function handleChatFlow(input) {
+      if (step === 4) {
+        showTyping();
+        setTimeout(() => {
+          appendMessage("Senti uma energia intensa no momento em que você respondeu… é como se algo precisasse ser revelado urgente 🌀", 'bot');
+          showTyping();
+          setTimeout(() => {
+            const msg6 = `<strong>Me diz com o coração aberto:</strong><br><br>Qual dessas situações mais descreve o que você sente hoje?<br><br>1️⃣ Quero meu amor de volta<br>2️⃣ Quero saber da minha vida amorosa<br>3️⃣ Quero saber se o amor é correspondido`;
+            appendMessage(msg6, 'bot', true);
+            step = 6;
+          }, 2000);
+        }, 1500);
+      } else if (step === 6) {
+        const opcoesValidas = ['1', '2', '3', 'um', 'dois', 'três', 'tres'];
+        const encontrouOpcao = opcoesValidas.some(opcao => input.includes(opcao));
+        if (encontrouOpcao) {
+          step = 7;
+          handleChatFlow();
+        } else {
+          appendMessage("Escolha 1, 2 ou 3, meu amor! 🌟", 'bot');
+        }
+      } else if (step === 7) {
+        showTyping();
+        setTimeout(() => {
+          appendMessage("<audio controls><source src='audio01.mp3' type='audio/mp3'>Seu navegador não suporta o elemento de áudio.</audio>", 'bot', true);
+          showTyping();
+          setTimeout(() => {
+            appendMessage("Já estou fazendo a tiragem das suas cartas!", 'bot');
+            step = 10;
+            setTimeout(() => {
+              showTyping();
+              setTimeout(() => {
+                appendMessage("As cartas já me deram uma resposta…", 'bot');
+                showTyping();
+                setTimeout(() => {
+                  appendMessage("💫 Na tiragem das cartas, vejo algo muito claro sobre você: Mesmo com a distância, você ainda carrega um laço forte com essa pessoa — e um desejo sincero de reviver esse amor.", 'bot');
+                  showTyping();
+                  setTimeout(() => {
+                    appendMessage("<img src='images/imagemoficial.png' alt='Imagem da tiragem' style='max-width: 100%; height: auto;'><br>Agora que fizemos a tiragem, vou te contar o que cada uma destas cartas significam em sua vida, okay?", 'bot', true);
+                    step = 12;
+                  }, 1500);
+                }, 1500);
+              }, 1500);
+            }, 30000);
+          }, 1500);
+        }, 2000);
+      } else if (step === 12) {
+        setTimeout(() => {
+          showTyping();
+          setTimeout(() => {
+            appendMessage("🔮 01. O Diabo (invertido)<br>Relação marcada por dependência, possessividade ou obsessão. Invertida, mostra chance de libertação desses padrões e reconquista mais saudável.", 'bot', true);
+            showTyping();
+            setTimeout(() => {
+              appendMessage("🔮 02. Dez de Espadas<br>Fim doloroso, término difícil. Mas também sinal de que o pior já passou e um novo ciclo pode começar.", 'bot', true);
+              showTyping();
+              setTimeout(() => {
+                appendMessage("🔮 03. A Temperança<br>Reconciliação, equilíbrio, cura emocional. Indica possibilidade de volta com mais harmonia e sabedoria.", 'bot', true);
+                showTyping();
+                setTimeout(() => {
+                  appendMessage("<span style='font-weight: bold; font-size: 15px;'> RESUMO FINAL DA SUA CONSULTA:</span>", 'bot', true);
+                  showTyping();
+                  setTimeout(() => {
+                    appendMessage("<audio controls><source src='audio02.mp3' type='audio/mp3'>Seu navegador não suporta o elemento de áudio.</audio>", 'bot', true);
+                    showTyping();
+                    setTimeout(() => {
+                      appendMessage("Mas isso tem solução — e eu posso te ajudar com um Ritual de Desbloqueio e Alinhamento Amoroso que vai limpar esse caminho e reabrir as portas pro retorno acontecer.", 'bot');
+                      showTyping();
+                      setTimeout(() => {
+                        appendMessage("<span style='font-weight: bold; color: #d32f2f; font-size: 15px;'> VOCÊ DESEJA FAZER? MUITO IMPORTANTE 🙌</span>", 'bot', true);
+                        step = 17;
+                      }, 1500);
+                    }, 2000);
+                  }, 1500);
+                }, 1500);
+              }, 1500);
+            }, 1500);
+          }, 1500);
+        }, 25000);
+      } else if (step === 17) {
+        showTyping();
+        setTimeout(() => {
+          appendMessage("🌟 Esse ritual é feito com proteção espiritual e direcionamento personalizado para o seu caso. Ele tem o valor simbólico de R$ 59,90, e pode ser feito hoje mesmo.", 'bot');
+          showTyping();
+          setTimeout(() => {
+            appendMessage("<strong>Me diz: SIM</strong> para seguir com o pagamento e iniciar o ritual!", 'bot', true);
+            step = 18;
+          }, 1500);
+        }, 1500);
+      } else if (step === 18 && !finalStepReached) {
+        showTyping();
+        setTimeout(() => {
+          appendMessage("Quer que eu te envie o link para efetuar o pagamento e dar início agora mesmo?", 'bot');
+        }, 1500);
+        setTimeout(() => {
+          showTyping();
+          setTimeout(() => {
+            appendMessage("Perfeito, meu amor!", 'bot');
+            showTyping();
+            setTimeout(() => {
+              appendMessage("Aqui está o link pra você confirmar seu Ritual de Desbloqueio:<br>👉 <a href='https://pagamento.divinotarot.site/checkout?product=e880f79b-2180-11f0-b1cb-46da4690ad53' target='_blank'>CLIQUE AQUI PARA PAGAR</a>", 'bot', true);
+              finalStepReached = true;
+            }, 1500);
+          }, 1500);
+        }, 15000);
+      } else {
+        if (finalStepReached) {
+          showTyping();
+          setTimeout(() => {
+            appendMessage("Aqui está o link pra você confirmar seu Ritual de Desbloqueio:<br>👉 <a href='https://pagamento.divinotarot.site/checkout?product=e880f79b-2180-11f0-b1cb-46da4690ad53' target='_blank'>CLIQUE AQUI PARA PAGAR</a>", 'bot', true);
+          }, 1500);
+        }
+      }
+    }
+
+    window.onload = () => {
+      const mensagensIniciais = [
+        "<strong>Oi, meu amor! ✨ Seja muito bem-vinda ao Divino Tarot.</strong>",
+        "Sou Júlia e senti sua energia antes mesmo de você chegar... Por isso, preparei uma tiragem <strong>GRATUITA</strong> e exclusiva. Mas preciso começar agora, essa conexão é forte e recente! 🔮",
+        "Pra eu me conectar melhor com sua energia e iniciar a tiragem, preciso de algumas informações rapidinhas…",
+        "💌 Me diga: qual seu nome completo e sua idade?<br><br><strong>(Ex: Maria de Souza, 28 anos)</strong>"
+      ];
+
+      mensagensIniciais.forEach((mensagem, index) => {
+        setTimeout(() => {
+          showTyping();
+          setTimeout(() => appendMessage(mensagem, 'bot', true), 1000);
+        }, index * 2500);
+      });
+    };
+  </script>
+</body>
+</html>

@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Conectando com as energias...</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: linear-gradient(135deg, #1d1e22, #3a3b3f);
+      color: #fff;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 20px;
+    }
+
+    h1 {
+      font-size: 1.8rem;
+      margin-bottom: 1rem;
+    }
+
+    p {
+      font-size: 1rem;
+      color: #ccc;
+      margin-bottom: 2rem;
+    }
+
+    .spinner {
+      width: 60px;
+      height: 60px;
+      border: 6px solid rgba(255, 255, 255, 0.2);
+      border-top-color: #00ffb3;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .footer {
+      position: absolute;
+      bottom: 15px;
+      font-size: 0.8rem;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+  <h1>Conectando com as energias do universo...</h1>
+  <p>Aguarde um instante. Estamos te direcionando para o atendimento espiritual via WhatsApp.</p>
+  <div class="spinner"></div>
+
+  <div class="footer">© 2025 | Divino Tarot Online</div>
+
+  <script>
+    const mensagens = [
+      "Quero minha consulta espiritual completa",
+      "Sinto que tem algo pra eu saber... pode me revelar?",
+      "Tô pronto(a) pra receber a mensagem que o universo tem pra mim",
+      "Senti de vir aqui. Pode compartilhar o que foi revelado pra mim?",
+      "Quero entender melhor as energias ao meu redor"
+    ];
+
+    let contador = parseInt(localStorage.getItem("contadorZap")) || 0;
+    let indiceAtual = parseInt(localStorage.getItem("indiceZap")) || 0;
+
+    contador++;
+    if (contador >= 10) {
+      contador = 0;
+      indiceAtual = (indiceAtual + 1) % mensagens.length;
+    }
+
+    localStorage.setItem("contadorZap", contador);
+    localStorage.setItem("indiceZap", indiceAtual);
+
+    let numero = "5547999329983"; // Substitui pelo teu número real
+    let msg = mensagens[indiceAtual];
+    let link = "https://wa.me/" + numero + "?text=" + encodeURIComponent(msg);
+
+    setTimeout(() => {
+      window.location.href = link;
+    }, 2500);
+  </script>
+</body>
+</html>
